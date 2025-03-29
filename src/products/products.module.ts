@@ -3,12 +3,14 @@ import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
+import { ProductImage } from './entities';
 
 @Module({
-  controllers: [ProductsController],
+  imports: [
+    TypeOrmModule.forFeature([Product, ProductImage]) // Clave Registra los repositorios
+  ],
   providers: [ProductsService],
-  /* imports: [
-    TypeOrmModule.forFeature([Product])
-  ] */
+  controllers: [ProductsController],
+  exports: [ProductsService, TypeOrmModule], // Exporta si otros modulos (Como SeedModule) lo necesitan
 })
 export class ProductsModule {}
