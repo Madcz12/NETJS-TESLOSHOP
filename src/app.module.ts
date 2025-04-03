@@ -1,34 +1,41 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductsService } from './products/products.service';
-import { ProductsController } from './products/products.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
+import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
-import { ProductsModule } from './products/products.module';
+import { FilesModule } from './files/files.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: +configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
-        entities: [join(process.cwd(), 'dist/**/*.entity.js')],
-        synchronize: true,
-      }),
+
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: +(process.env.DB_PORT || '5432'), // PostgreSQL default port
+      database: process.env.DB_NAME,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,      
+      autoLoadEntities: true,
+      synchronize: true,
     }),
-    ProductsModule, // <-- Importa ProductsModule (contiene TypeOrm.forFeature)
-    SeedModule,     // <-- Importa SeedModule (que a su vez importa ProductsModule)
+
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
+    ProductsModule,
+
     CommonModule,
+
+    SeedModule,
+
+    FilesModule,
+
+    AuthModule,
   ],
-  // Elimina providers y controllers que pertenecen a otros módulos
 })
 export class AppModule {}

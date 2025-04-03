@@ -1,16 +1,19 @@
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Product } from './entities/product.entity';
-import { ProductImage } from './entities';
+
+import { Product, ProductImage } from './entities';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Product, ProductImage]) // Clave Registra los repositorios
-  ],
-  providers: [ProductsService],
   controllers: [ProductsController],
-  exports: [ProductsService, TypeOrmModule], // Exporta si otros modulos (Como SeedModule) lo necesitan
+  providers: [ProductsService],
+  imports: [
+    TypeOrmModule.forFeature([ Product, ProductImage ])
+  ],
+  exports: [
+    ProductsService,
+    TypeOrmModule,
+  ]
 })
 export class ProductsModule {}
