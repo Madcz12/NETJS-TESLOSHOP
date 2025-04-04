@@ -6,6 +6,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { jwtConstants } from '../constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy( Strategy ) {
@@ -14,23 +15,23 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
         @InjectRepository( User )
         private readonly userRepository: Repository<User>,
 
-        configService: ConfigService, 
+        //configService: ConfigService, 
               
     ) {
-
         super({
-            
-            secretOrKey: configService.get('JWT_SECRET'),
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        });
+            ignoreExpiration: false,
+            secretOrKey: jwtConstants.secret,
+          });
+          //console.log(jwtConstants.secret);
     }
-
 
     async validate( payload: JwtPayload ): Promise<User> {
         
-        const { email } = payload;
+        //const { email } = payload;
+        const { id } = payload;
 
-        const user = await this.userRepository.findOneBy({ email });
+        const user = await this.userRepository.findOneBy({ id });
 
         if ( !user ) 
             throw new UnauthorizedException('Token not valid')
@@ -38,6 +39,7 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
         if ( !user.isActive ) 
             throw new UnauthorizedException('User is inactive, talk with an admin');
         
+        console.log({user});
 
         return user;
     }

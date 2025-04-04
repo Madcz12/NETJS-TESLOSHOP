@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { jwtConstants } from './constants';
 
 
 @Module({
@@ -24,7 +25,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         //console.log('JWT SECRET', )
         //console.log('JWT SECRET', process.env.JWT_SECRET)
         return {
-          secret: configService.get('JWT_SECRET'),
+          secret: jwtConstants.secret,
           signOptions: {
             expiresIn: '2h'
           }
