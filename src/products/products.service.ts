@@ -6,6 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { isUUID } from 'class-validator';
 import { ProductImage, Product } from './entities';
+import { User } from 'src/auth/entities/user.entity';
 
 
 @Injectable()
@@ -28,7 +29,7 @@ export class ProductsService { // las interacciones con la base de datos son as√
 
   ){}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
     
     try {
       
@@ -36,7 +37,8 @@ export class ProductsService { // las interacciones con la base de datos son as√
       
       const product = this.productRepository.create({
         ...productDetails,
-        images: images.map( image => this.productImageRepository.create({url: image}) )
+        images: images.map( image => this.productImageRepository.create({url: image}) ), 
+        user,
       });
       
       await this.productRepository.save(product);
@@ -103,7 +105,7 @@ export class ProductsService { // las interacciones con la base de datos son as√
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
 
     // ejecutamos un queryrunner con las transacciones 
 
@@ -128,6 +130,7 @@ export class ProductsService { // las interacciones con la base de datos son as√
         )
       }
 
+      product.user = user;
       await queryRunner.manager.save( product );
 
       await queryRunner.commitTransaction();
